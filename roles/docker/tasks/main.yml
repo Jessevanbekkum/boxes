@@ -1,0 +1,25 @@
+---
+- name: Install list of packages
+  apt: name={{item}} state=installed update_cache=true
+  become: true
+  with_items:
+    - docker-ce
+    - docker-compose
+
+- name: Add jesse to the docker group
+  become: true
+  user:
+    name: jesse
+    groups: docker
+    append: yes
+
+- name: Copy custom zsh files
+  become: true
+  template:
+    src: "roles/common/templates/{{item}}.j2"
+    dest: /home/jesse/.oh-my-zsh/custom/{{item}}.zsh
+    mode: 0700
+    owner: jesse
+    group: wheel
+  with_items:
+    - docker

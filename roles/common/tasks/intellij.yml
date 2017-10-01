@@ -1,0 +1,39 @@
+---
+- name: Copy Intellij
+  become: true
+  copy:
+    src: roles/common/files/ideaIU-2017.1.4.tar.gz
+    dest: /home/jesse/Downloads/ideaIU-2017.1.4.tar.gz
+    owner: jesse
+    group: wheel
+    mode: 0755
+  register: intellij
+
+- name: Make sure idea directory exists
+  file: 
+    path: /opt/ideaIU
+    owner: root
+    group: wheel
+    state: directory
+    owner: jesse
+
+- name: Extract Intellij
+  unarchive:
+    src: /home/jesse/Downloads/ideaIU-2017.1.4.tar.gz
+    dest: /opt/ideaIU
+  become: true
+  when: intellij.changed
+
+- name: Place a symbolic link on the desktop to start Intellij
+  shell: |
+    find /opt -name 'idea.sh'  -exec ln -s {} /home/jesse/Desktop/idea.sh \;
+    chown jesse:wheel /home/jesse/Desktop/idea.sh
+  become: true
+  when: intellij.changed
+
+- name: Set inotify value for Intellij
+  sysctl:
+    name: fs.inotify.max_user_watches
+    value: 524288
+    state: present
+  become: true

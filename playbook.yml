@@ -1,0 +1,143 @@
+---
+- hosts: all
+  vars:
+    http_port: 80
+    max_clients: 200
+  remote_user: root
+  tasks:
+
+  # - name: add repo for java 8
+  #   apt_repository: repo='ppa:webupd8team/java' state=present
+  #   become: true
+
+
+  - name: add repository signing keys
+    apt_key: url={{item}} state=present
+    become: true
+    with_items:
+      - https://download.docker.com/linux/ubuntu/gpg
+      - https://dl-ssl.google.com/linux/linux_signing_key.pub
+
+  - name: add repos
+    apt_repository: repo='{{item}}' state=present
+    become: true
+    with_items:
+      - deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+      - deb http://dl.google.com/linux/chrome/deb/ stable main
+      - ppa:webupd8team/atom
+#  -
+# sudo sh -c 'echo "deb https://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+# sudo apt-get update
+# sudo apt-get install google-chrome-stable
+
+  # - name: set licence selected
+  #   shell: /bin/echo debconf shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+  #   become: true
+  #
+  # - name: set licence seen
+  #   shell: /bin/echo debconf shared/accepted-oracle-license-v1-1 seen true | /usr/bin/debconf-set-selections
+  #   become: true
+  #
+  # - name: install java 8
+  #   apt: name=oracle-java8-installer state=latest update-cache=yes force=yes
+  #   become: true
+
+  - name: Install list of packages
+    apt: name={{item}} state=installed update_cache=true
+    become: true
+    with_items:
+         - zsh
+         - maven
+         - docker-ce
+         - xfce4
+         - virtualbox-guest-dkms
+         - virtualbox-guest-utils
+         - virtualbox-guest-x11
+         - git
+         - ubuntu-desktop
+         - atom
+         - cntlm
+         - openjdk-8-jre
+         - google-chrome-stable
+         - ntp
+         - ntp-doc
+
+
+  - name: Make sure we have a 'wheel' group
+    group:
+      name: wheel
+      state: present
+    become: true
+
+  - name: Allow 'wheel' group to have passwordless sudo
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^%wheel'
+      line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    become: true
+
+  - name: Add sudoers users to wheel group
+    user:
+      name: jesse
+      comment: "Jesse van Bekkum"
+      shell: /bin/zsh
+      group: wheel
+      state: present
+      createhome: yes
+      password: $6$opHS.cyl7NrRQ1$koNiPlU23GInqcwArgLh55oHF.JjJ0FSxfLxnVc.gJ16XPyYm8cFlwDFaRIYZykV8fTV4AFsFqmi41vK8bzXu/
+    become: true
+
+  - name: Install Oh My zsh
+    shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+    args:
+        creates: ~/.zshrc
+    become: true
+    become_user: jesse
+
+  - name: Install zsh plugins
+    become: true
+    become_user: jesse
+    replace:
+      path: ~/.zshrc
+      regexp: '^plugins=.*$'
+      replace: 'plugins=(git docker mvn)'
+      backup: yes
+
+  - name: set timezone to Europe/Amsterdam
+    timezone:
+      name: Europe/Amsterdam
+    become: true
+
+  - name: Set time zone to 24 hours
+    command: gsettings set com.canonical.indicator.datetime time-format 24-hour
+    become: true
+    become_user: jesse
+
+  - name: Download Intellij
+    get_url:
+      url: https://download.jetbrains.com/idea/ideaIU-2017.1.4.tar.gz
+      dest: /tmp/ideaIU-2017.1.4.tar.gz
+      mode: 0440
+    notify: Extract Intellij
+
+
+
+
+  handlers:
+  - name: Extract Intellij
+    unarchive:
+      src: /tmp/ideaIU-2017.1.4.tar.gz
+      dest: /opt/
+    become: true
+
+#  - name: Set scaling to 1.75
+#    shell: "dconf write /com/ubuntu/user-interface/scale-factor \"{'VGA-1': 14}\""
+
+  # - name:
+  #   replace:
+  #     path: /etc/X11/Xwrapper.config
+  #     regexp: 'allowed_users=.*$'
+  #     replace: 'allowed_users=anybody/'
+  #     backup: no
+  #   become: true

@@ -1,0 +1,46 @@
+---
+- name: Download maven 3.5
+  get_url:
+    checksum: md5:35c39251d2af99b6624d40d801f6ff02
+    url: http://ftp.tudelft.nl/apache/maven/maven-3/3.5.0/binaries/apache-maven-3.5.0-bin.tar.gz
+    dest: /opt/apache-maven-3.5.0-bin.tar.gz
+  register: maven
+  become: true
+
+- name: Extract maven
+  unarchive:
+    src: /opt/apache-maven-3.5.0-bin.tar.gz
+    dest: /opt
+    group: wheel
+  when: maven
+  become: true
+
+- name: Symlink maven
+  file:
+    src: /opt/apache-maven-3.5.0
+    path: /opt/apache-maven
+    state: link
+    mode: 0755
+
+- name: Make sure m2 dir exists
+  file: 
+    path: /home/jesse/.m2 
+    state: directory
+    owner: jesse
+
+- name: Set permissions for /opt
+  file:
+    path: /opt
+    recurse: true
+    group: wheel
+    mode: g+w
+  become: true
+
+- name: Set path
+  lineinfile:
+    dest: ~/.zshrc
+    state: present
+    regexp: 'PATH='
+    line: 'PATH=/opt/apache-maven/bin:$PATH'
+  become: true
+  become_user: jesse

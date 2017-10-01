@@ -1,0 +1,18 @@
+---
+- hosts: all
+  roles:
+    - common
+    - docker
+  vars:
+    email: bekkum@gmail.com
+    ansible_become: true
+    java_package: openjdk-8-jdk
+  remote_user: root
+  tasks:
+  - include: roles/common/tasks/main.yml
+  - include: roles/common/tasks/unity.yml
+  - include: roles/common/tasks/docker.yml
+  - include: roles/common/tasks/opt.yml
+  - include: roles/common/tasks/intellij.yml
+  handlers:
+  - include: roles/common/handlers/main.yml

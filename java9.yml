@@ -1,0 +1,26 @@
+---
+- hosts: all
+  roles:
+    - common
+    - virtualbox
+    - java
+  vars:
+    email: bekkum@gmail.com
+    ansible_become: true
+    # which version?
+    java_version: 9
+    # which subversion?
+    java_subversion: 181
+    # which directory to put the download file?
+    java_download_path: /tmp
+    # rpm/tar.gz file location:
+    #   - true: download from Oracle on-the-fly;
+    #   - false: copy from `{{ playbook_dir }}/files` on the control machine.
+    java_download_from_oracle: true
+    # remove temporary downloaded files?
+    java_remove_download: true
+    # set $JAVA_HOME?
+    java_set_javahome: false
+    # install JCE?
+    java_install_jce: true
+  remote_user: root

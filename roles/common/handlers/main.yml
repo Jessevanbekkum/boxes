@@ -1,0 +1,43 @@
+---
+
+
+- name: Restart server
+  command: shutdown -r now "Reboot triggered by Ansible"
+  async: 0
+  poll: 0
+  ignore_errors: true
+
+- name: Wait for server to restart
+  local_action:
+    module: wait_for
+      host={{ inventory_hostname }}
+      port=22
+      delay=1
+      timeout=300
+    sudo: false
+
+- name: Restart cntlm
+  service:
+    name: cntlm
+    state: restarted
+  become: true
+
+- name: Restart network-manager
+  service:
+    name: network-manager
+    state: restarted
+  become: true
+
+- name: Remove windows line endings
+  shell: /usr/bin/dos2unix {{item}}
+  become: true
+  with_items:
+    - files_created.results
+
+- name: Restart docker
+  service:
+    name: docker
+    state: restarted
+
+- name: Update certificate index
+  shell: /usr/sbin/update-ca-certificates

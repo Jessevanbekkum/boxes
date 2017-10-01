@@ -1,0 +1,10 @@
+---
+
+- name: Copy Insomnia
+  copy: src=roles/common/files/insomnia_5.4.0_amd64.deb dest=/home/jesse/Downloads/ owner=jesse group=wheel mode=g+w
+  become: true
+  register: insomnia
+
+  - name: Install insomnia
+  apt: deb=/home/jesse/Downloads/insomnia_5.4.0_amd64.deb
+  become: true

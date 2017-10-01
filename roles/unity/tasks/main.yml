@@ -1,0 +1,30 @@
+---
+- name: Install GUI
+  apt: name={{item}} state=installed update_cache=true
+  become: true
+  with_items:
+    - ubuntu-desktop
+  register: gui
+
+- name: set timezone to Europe/Amsterdam
+  timezone:
+    name: Europe/Amsterdam
+  become: true
+  become_user: jesse
+
+- name: Configure screensaver and lock screensaver
+  become: true
+  gsetting:
+    user: jesse
+    key: "{{item.key}}"
+    value: "{{item.value}}"
+  with_items:
+    - {key: 'org.gnome.desktop.session idle-delay', value: 0}
+    - {key: 'org.gnome.desktop.screensaver lock-enabled', value: false}
+    - {key: 'org.gnome.desktop.lockdown disable-lock-screen', value: true}
+    - {key: 'com.canonical.indicator.datetime time-format', value: '24-hour'}
+
+- name: Disable guest user
+  lineinfile:
+    dest: '/usr/share/lightdm/lightdm.conf.d/50-ubuntu.conf'
+    line: 'allow-guest=false'    
