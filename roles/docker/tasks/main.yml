@@ -16,7 +16,7 @@
 - name: Copy custom zsh files
   become: true
   template:
-    src: "roles/common/templates/{{item}}.j2"
+    src: "{{item}}.j2"
     dest: /home/jesse/.oh-my-zsh/custom/{{item}}.zsh
     mode: 0700
     owner: jesse

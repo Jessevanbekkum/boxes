@@ -3,10 +3,26 @@
   roles:
     - common
     - docker
+    - java
   vars:
     email: bekkum@gmail.com
     ansible_become: true
-    java_package: openjdk-8-jdk
+    # java_package: openjdk-8-jdk
+    # which version?
+    java_version: 8
+    # which subversion?
+    java_subversion: 144
+    # which directory to put the download file?
+    java_download_path: /tmp
+    # rpm/tar.gz file location:
+    #   - true: download from Oracle on-the-fly;
+    #   - false: copy from `{{ playbook_dir }}/files` on the control machine.
+    java_download_from_oracle: true
+    # remove temporary downloaded files?
+    java_remove_download: true
+    # install JCE?
+    java_install_jce: true
+    jdk_tarball_url: http://download.oracle.com/otn-pub/java/jdk/8u144-b01/090f390dda5b47b9b721c7dfaa008135/jdk-8u144-linux-x64.tar.gz
   remote_user: root
   tasks:
   - include: roles/common/tasks/main.yml

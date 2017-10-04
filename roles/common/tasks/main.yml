@@ -161,7 +161,6 @@
     - {key: 'user.name', value: 'Jesse van Bekkum'}
     - {key: 'push.default', value: 'simple'}
 
-- include_tasks: roles/common/tasks/unity.yml
 - include_tasks: roles/common/tasks/intellij.yml
 - include_tasks: roles/common/tasks/prog.yml
 - include_tasks: roles/common/tasks/maven.yml
@@ -214,5 +213,3 @@
   # 179  chmod -R 755 apache-maven-3.5.0
   # 180  sudod chmod -R 755 apache-maven-3.5.0
   # 181  sudo chmod -R 755 apache-maven-3.5.0
-
-

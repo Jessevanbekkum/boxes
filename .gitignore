@@ -5,3 +5,5 @@ sting.yml
 roles/sting
 
 roles/common/files/
+
+*.retry

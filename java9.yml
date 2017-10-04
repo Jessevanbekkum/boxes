@@ -19,8 +19,7 @@
     java_download_from_oracle: true
     # remove temporary downloaded files?
     java_remove_download: true
-    # set $JAVA_HOME?
-    java_set_javahome: false
     # install JCE?
     java_install_jce: true
+    jdk_tarball_url: http://download.oracle.com/otn-pub/java/jdk/9+181/jdk-9_linux-x64_bin.tar.gz
   remote_user: root

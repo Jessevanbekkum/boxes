@@ -2,16 +2,6 @@
 # Installation script for Java Cryptography Extensions (JCE)
 
 - block:
-  - name: Find Java Home in Mac
-    shell: /usr/libexec/java_home
-    register: java_home_cmd
-    changed_when: false
-  - name: Set java_home
-    set_fact: java_home={{ java_home_cmd.stdout }}
-    when: java_home_cmd.skipped is not defined and java_home is not defined
-  when: ansible_os_family == "Darwin"
-
-- block:
   - name: Make sure 'which' is installed
     package: name=which state=present
     when: ansible_os_family == "RedHat"
