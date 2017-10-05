@@ -23,8 +23,8 @@
     mode: 0755
 
 - name: Make sure m2 dir exists
-  file: 
-    path: /home/jesse/.m2 
+  file:
+    path: /home/jesse/.m2
     state: directory
     owner: jesse
 
@@ -44,3 +44,12 @@
     line: 'PATH=/opt/apache-maven/bin:$PATH'
   become: true
   become_user: jesse
+
+- name: Copy maven shell aliases
+  become: true
+  template:
+    src: "maven.j2"
+    dest: /home/jesse/.oh-my-zsh/custom/maven.zsh
+    mode: 0700
+    owner: jesse
+    group: wheel

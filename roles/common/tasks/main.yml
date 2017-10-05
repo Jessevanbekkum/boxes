@@ -57,7 +57,7 @@
   apt: name={{item}} state=installed update_cache=true
   become: true
   with_items:
-       - "{{java_package}}"
+    - "{{java_package}}"
 
 - name: Upgrade packages
   apt: upgrade=full
@@ -125,7 +125,7 @@
 - name: Copy custom zsh files
   become: true
   template:
-    src: "roles/common/templates/{{item}}.j2"
+    src: "{{item}}.j2"
     dest: /home/jesse/.oh-my-zsh/custom/{{item}}.zsh
     mode: 0700
     owner: jesse
@@ -163,7 +163,6 @@
 
 - include_tasks: roles/common/tasks/intellij.yml
 - include_tasks: roles/common/tasks/prog.yml
-- include_tasks: roles/common/tasks/maven.yml
 
   ### TODO
 

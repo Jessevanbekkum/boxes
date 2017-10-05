@@ -4,9 +4,11 @@
     - common
     - docker
     - java
+    - maven
   vars:
     email: bekkum@gmail.com
     ansible_become: true
+    playbook_filename: dev.yml
     # java_package: openjdk-8-jdk
     # which version?
     java_version: 8
@@ -24,11 +26,3 @@
     java_install_jce: true
     jdk_tarball_url: http://download.oracle.com/otn-pub/java/jdk/8u144-b01/090f390dda5b47b9b721c7dfaa008135/jdk-8u144-linux-x64.tar.gz
   remote_user: root
-  tasks:
-  - include: roles/common/tasks/main.yml
-  - include: roles/common/tasks/unity.yml
-  - include: roles/common/tasks/docker.yml
-  - include: roles/common/tasks/opt.yml
-  - include: roles/common/tasks/intellij.yml
-  handlers:
-  - include: roles/common/handlers/main.yml

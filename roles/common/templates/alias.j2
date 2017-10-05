@@ -33,18 +33,6 @@ alias lm='ls -al |more'    # pipe through 'more'
 alias lr='ls -lR'          # recursive ls
 alias tree='tree -Csu'     # nice alternative to 'recursive ls'
 
-#-------------------------------------------------------------
-# Maven related
-#-------------------------------------------------------------
-alias mvn='mvn -Djava.awt.headless=true'
-alias mci='mvn clean install'
-alias mis='mvn -T 1C install -DskipTests'
-alias mcis='mvn -T 1C clean install -DskipTests'
-alias mvnl='mvn -T 1C clean install -P java -DskipTests'
-alias mp='mvn -T 1C package '
-alias mps='mvn -T 1C package -DskipTests'
-alias msbr='mvn spring-boot:run'
-
 #---------------------
 # Docker
 #---------------------

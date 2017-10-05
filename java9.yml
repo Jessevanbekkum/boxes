@@ -4,9 +4,11 @@
     - common
     - virtualbox
     - java
+    - maven
   vars:
     email: bekkum@gmail.com
     ansible_become: true
+    playbook_filename: java9.yml
     # which version?
     java_version: 9
     # which subversion?

@@ -10,12 +10,11 @@
   register: intellij
 
 - name: Make sure idea directory exists
-  file: 
+  file:
     path: /opt/ideaIU
     owner: root
     group: wheel
     state: directory
-    owner: jesse
 
 - name: Extract Intellij
   unarchive:
