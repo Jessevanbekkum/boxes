@@ -2,27 +2,47 @@
 - hosts: all
   roles:
     - common
-    - docker
-    - java
-    - maven
+    - role: angstwad.docker_ubuntu
+      docker_group_members: [jesse]
+    - role: gantsign.java
+      java_version: '9'
+      java_license_declaration: 'I accept the "Oracle Binary Code License Agreement for the Java SE Platform Products and JavaFX" under the terms at http://www.oracle.com/technetwork/java/javase/terms/license/index.html'
+    - role: gantsign.maven
+    - role: gantsign.intellij
+      intellij_version: '2017.3'
+      intellij_edition: ultimate
+      intellij_license_key_path: '/ansible/idea.key'
+      users:
+        - username: jesse
+    - role: gantsign.oh-my-zsh
+      users:
+        - username: jesse
+          oh_my_zsh:
+            plugins:
+              - git
+              - docker
+              - mvn
+              - extract
+              - sudo
+              - ubuntu
+              - z
+    - role: tersmitten.sudoers
+
   vars:
     email: bekkum@gmail.com
     ansible_become: true
     playbook_filename: dev.yml
-    # java_package: openjdk-8-jdk
-    # which version?
-    java_version: 8
-    # which subversion?
-    java_subversion: 144
-    # which directory to put the download file?
-    java_download_path: /tmp
-    # rpm/tar.gz file location:
-    #   - true: download from Oracle on-the-fly;
-    #   - false: copy from `{{ playbook_dir }}/files` on the control machine.
-    java_download_from_oracle: true
-    # remove temporary downloaded files?
-    java_remove_download: true
-    # install JCE?
-    java_install_jce: true
-    jdk_tarball_url: http://download.oracle.com/otn-pub/java/jdk/8u144-b01/090f390dda5b47b9b721c7dfaa008135/jdk-8u144-linux-x64.tar.gz
+    ssh_key_comment: bekkum@gmail.com (dev)
+    sudoers_sudoers:
+      defaults:
+        - env_reset
+        - exempt_group=sudo
+        - secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      privileges:
+        - name: root
+          entry: "ALL=(ALL:ALL) ALL"
+        - name: "%admin"
+          entry: "ALL=(ALL) ALL"
+        - name: "%sudo"
+          entry: "ALL=NOPASSWD:ALL"
   remote_user: root

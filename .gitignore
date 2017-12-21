@@ -4,6 +4,11 @@ roles/ing
 sting.yml
 roles/sting
 
+hybris.yml
+roles/hybris
+
 roles/common/files/
 
 *.retry
+
+idea.key

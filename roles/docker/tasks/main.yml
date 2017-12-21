@@ -12,14 +12,3 @@
     name: jesse
     groups: docker
     append: yes
-
-- name: Copy custom zsh files
-  become: true
-  template:
-    src: "{{item}}.j2"
-    dest: /home/jesse/.oh-my-zsh/custom/{{item}}.zsh
-    mode: 0700
-    owner: jesse
-    group: wheel
-  with_items:
-    - docker

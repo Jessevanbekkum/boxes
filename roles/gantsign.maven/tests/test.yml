@@ -1,0 +1,79 @@
+---
+- hosts: all
+  remote_user: root
+
+  pre_tasks:
+    # Travis CI doesn't provide all the Debian dependencies for the full JDK.
+    - name: install jre-headless 7 (apt)
+      become: yes
+      apt:
+        name: openjdk-7-jre-headless
+        state: present
+      when: "ansible_distribution == 'Debian'"
+
+    - name: install jdk 7 (apt)
+      become: yes
+      apt:
+        name: openjdk-7-jdk
+        state: present
+      when: "ansible_distribution == 'Ubuntu' and ansible_distribution_version == '14.04'"
+
+    - name: install jdk 8 (apt)
+      become: yes
+      apt:
+        name: openjdk-8-jdk
+        state: present
+      when: "ansible_distribution == 'Ubuntu' and ansible_distribution_version != '14.04'"
+
+    - name: install Ansible dnf dependency (dnf)
+      become: yes
+      command: dnf install -y python2-dnf
+      args:
+        warn: no
+      changed_when: no
+      when: ansible_pkg_mgr == 'dnf'
+
+    - name: install jdk 8 (yum, dnf)
+      become: yes
+      package:
+        name: java-1.8.0-openjdk-headless
+        state: present
+      when: ansible_pkg_mgr in ('yum', 'dnf')
+
+    - name: install Ansible zypper dependency (zypper)
+      become: yes
+      command: zypper install -y python-xml
+      args:
+        warn: no
+      changed_when: no
+      when: ansible_pkg_mgr == 'zypper'
+
+    - name: install jdk 8 (zypper)
+      become: yes
+      zypper:
+        name: java-1_8_0-openjdk-headless
+        state: present
+      when: ansible_pkg_mgr == 'zypper'
+
+  roles:
+    - role: ansible-role-maven
+      maven_version: '3.5.0'
+      maven_install_dir: /opt/maven
+
+    - role: ansible-role-maven
+      maven_version: '3.3.9'
+      maven_is_default_installation: no
+      maven_fact_group_name: maven_3_3
+
+  post_tasks:
+    - name: verify default maven facts
+      assert:
+        that:
+          - ansible_local.maven.general.version is defined
+          - ansible_local.maven.general.home is defined
+
+    - name: verify maven 3.3 facts
+      assert:
+        that:
+          - ansible_local.maven_3_3.general.version is defined
+          - ansible_local.maven_3_3.general.home is defined

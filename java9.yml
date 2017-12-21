@@ -2,26 +2,36 @@
 - hosts: all
   roles:
     - common
-    - virtualbox
-    - java
-    - maven
+    - role: unity
+    - docker
+    - role: gantsign.java
+      java_version: '9'
+      java_license_declaration: 'I accept the "Oracle Binary Code License Agreement for the Java SE Platform Products and JavaFX" under the terms at http://www.oracle.com/technetwork/java/javase/terms/license/index.html'
+    - role: gantsign.maven
+    - role: gantsign.intellij
+      intellij_version: '2017.2.5'
+      intellij_edition: ultimate
+      intellij_license_key_path: '/ansible/idea.key'
+      users:
+        - username: jesse
+    - role: gantsign.oh-my-zsh
+      users:
+        - username: jesse
+          plugins:
+            - git
+            - docker
+            - mvn
+            - extract
+            - sudo
+            - ubuntu
+            - z
+    - role: cmprescott.chrome
+      become: yes
+    - role: finalize
+
   vars:
     email: bekkum@gmail.com
     ansible_become: true
-    playbook_filename: java9.yml
-    # which version?
-    java_version: 9
-    # which subversion?
-    java_subversion: 181
-    # which directory to put the download file?
-    java_download_path: /tmp
-    # rpm/tar.gz file location:
-    #   - true: download from Oracle on-the-fly;
-    #   - false: copy from `{{ playbook_dir }}/files` on the control machine.
-    java_download_from_oracle: true
-    # remove temporary downloaded files?
-    java_remove_download: true
-    # install JCE?
-    java_install_jce: true
-    jdk_tarball_url: http://download.oracle.com/otn-pub/java/jdk/9+181/jdk-9_linux-x64_bin.tar.gz
+    playbook_filename: dev.yml
+
   remote_user: root

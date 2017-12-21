@@ -1,0 +1,94 @@
+---
+- name: create download directory
+  file:
+    state: directory
+    mode: 'u=rwx,go=rx'
+    dest: '{{ postman_download_dir }}'
+
+- name: ensure ca-certificates installed (apt)
+  become: yes
+  apt:
+    name: ca-certificates
+    state: present
+  when: ansible_pkg_mgr == 'apt'
+
+- name: check for version file
+  stat:
+    path: '{{ postman_version_path }}'
+  register: version_file_test
+
+- name: read version file
+  slurp:
+    src: '{{ postman_version_path }}'
+  register: version_file
+  when: version_file_test.stat.exists
+
+- name: set existing version fact
+  set_fact:
+    postman_existing_version: '{{ version_file.content | b64decode }}'
+  when: version_file_test.stat.exists
+
+- name: check latest remote Postman version
+  uri:
+    url: '{{ postman_redis_url }}'
+    method: HEAD
+    follow_redirects: safe
+  check_mode: no
+  register: head_query
+
+- name: set latest version fact
+  set_fact:
+    postman_latest_version: '{{ head_query.content_disposition }}'
+
+- name: download Postman
+  get_url:
+    url: '{{ postman_redis_url }}'
+    dest: '{{ postman_download_dir }}/{{ postman_redis_filename }}'
+    force: '{{ postman_latest_version != postman_existing_version }}'
+    use_proxy: yes
+    validate_certs: yes
+    mode: 'u=rw,go=r'
+
+- name: update version file
+  copy:
+    content: '{{ postman_latest_version }}'
+    dest: '{{ postman_version_path }}'
+
+- name: create Postman installation directory
+  become: yes
+  file:
+    state: directory
+    owner: root
+    group: root
+    mode: 'u=rwx,go=rx'
+    dest: '{{ postman_install_dir }}'
+
+- name: install Postman
+  become: yes
+  unarchive:
+    src: '{{ postman_download_dir }}/{{ postman_redis_filename }}'
+    remote_src: yes
+    dest: '{{ postman_install_dir }}'
+    extra_opts:
+     - '--strip-components=1'
+    creates: '{{ postman_install_dir }}/Postman'
+
+- name: install Postman link
+  become: yes
+  file:
+    state: link
+    force: yes
+    src: '{{ postman_install_dir }}/Postman'
+    dest: '/usr/local/bin/Postman'
+    owner: root
+    group: root
+    mode: 'u=rwx,go=rx'
+
+- name: install Postman desktop file
+  become: yes
+  template:
+    src: Postman.desktop.j2
+    dest: '/usr/share/applications/Postman.desktop'
+    owner: root
+    group: root
+    mode: 'u=rw,go=r'

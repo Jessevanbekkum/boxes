@@ -6,209 +6,31 @@
     state: present
   become: true
 
-- name: Allow 'wheel' group to have passwordless sudo
-  lineinfile:
-    dest: /etc/sudoers
+- name: Make sure we have a 'jesse' group
+  group:
+    name: jesse
     state: present
-    regexp: '^%wheel'
-    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
   become: true
+
+# - name: Allow 'wheel' group to have passwordless sudo
+#   lineinfile:
+#     dest: /etc/sudoers
+#     state: present
+#     regexp: '^%wheel'
+#     line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+#   become: true
 
 - name: Create user jesse
   user:
     name: jesse
     comment: "Jesse van Bekkum"
     shell: /bin/zsh
-    group: wheel
+    groups: "jesse, users, sudo"
     state: present
     createhome: yes
     password: $6$opHS.cyl7NrRQ1$koNiPlU23GInqcwArgLh55oHF.JjJ0FSxfLxnVc.gJ16XPyYm8cFlwDFaRIYZykV8fTV4AFsFqmi41vK8bzXu/
     skeleton: yes
     generate_ssh_key: yes
+    ssh_key_type: ed25519
+    ssh_key_comment: "{{ssh_key_comment}}"
   become: true
-
-- name: add repository signing keys
-  apt_key: url={{item}} state=present
-  become: true
-  with_items:
-    - https://download.docker.com/linux/ubuntu/gpg
-    - https://dl-ssl.google.com/linux/linux_signing_key.pub
-    - https://deb.nodesource.com/gpgkey/nodesource.gpg.key
-    - https://download.sublimetext.com/sublimehq-pub.gpg
-
-- name: add repos
-  apt_repository: repo='{{item}}' state=present
-  become: true
-  with_items:
-    - deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
-    - deb http://dl.google.com/linux/chrome/deb/ stable main
-    - deb https://deb.nodesource.com/node_6.x xenial main
-    - deb-src https://deb.nodesource.com/node_6.x xenial main
-    - deb https://download.sublimetext.com/ apt/stable/
-    - ppa:webupd8team/java
-
-
-- name: Install list of packages
-  apt: name={{item}} state=installed update_cache=true
-  become: true
-  with_items: "{{ apt_packages }}"
-
-- name: Install list of packages
-  apt: name={{item}} state=installed update_cache=true
-  become: true
-  with_items:
-    - "{{java_package}}"
-
-- name: Upgrade packages
-  apt: upgrade=full
-  become: true
-
-- name: Install remote packages
-  apt:
-    deb: "{{item}}"
-  become: true
-  with_items:
-    - http://nl.archive.ubuntu.com/ubuntu/pool/universe/g/git-extras/git-extras_4.3.0-1_all.deb
-    # - https://launchpad.net/ubuntu/+source/maven/3.5.0-5/+build/12855492/+files/maven_3.5.0-5_all.deb
-
-# - name: Download and install maven 3.5
-#   unarchive:
-#     url:
-#     remote_src: true
-#     dest: /opt
-#
-
-- name: Let network-manager manage all network connections
-  lineinfile:
-    dest: /etc/NetworkManager/NetworkManager.conf
-    state: present
-    regexp: '^managed='
-    line: 'managed=true'
-  become: true
-  notify: Restart network-manager
-# - name: Install remote packages
-#   apt: deb={{item}}
-#   become: true
-#   with_items:
-#     - https://builds.insomnia.rest/downloads/ubuntu/latest
-
-- name: Already create a bunch of directories the home dir
-  file: state=directory path={{item}}
-  become: true
-  become_user: jesse
-  with_items:
-    - ~/Downloads
-    - ~/Desktop
-
-- name: Already create a bunch of directories the home dir
-  file: state=directory path={{item}}
-  become: true
-  become_user: jesse
-  with_items: "{{ dirs_in_home }}"
-
-- name: Install Oh My zsh
-  shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-  args:
-      creates: ~/.zshrc
-  become: true
-  become_user: jesse
-
-- name: Copy post installation script
-  template:
-    src: postInstall.j2
-    dest: /home/jesse/Desktop/postInstall.sh
-    mode: 0700
-    owner: jesse
-    group: wheel
-  become: true
-
-- name: Copy custom zsh files
-  become: true
-  template:
-    src: "{{item}}.j2"
-    dest: /home/jesse/.oh-my-zsh/custom/{{item}}.zsh
-    mode: 0700
-    owner: jesse
-    group: wheel
-  with_items:
-    - alias
-    - shell_utils
-
-- name: Install zsh plugins
-  become: true
-  become_user: jesse
-  replace:
-    path: ~/.zshrc
-    regexp: '^plugins=.*$'
-    replace: 'plugins=(git docker mvn extract sudo ubuntu z)'
-
-- name: Environment variables
-  become: true
-  lineinfile:
-    path: /etc/environment
-    line: 'JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64'
-
-- name: Set git properties
-  git_config:
-    name: '{{ item.key }}'
-    scope: global
-    value: '{{ item.value }}'
-  become: true
-  become_user: jesse
-  with_items:
-    - {key: 'core.editor', value: 'vim'}
-    - {key: 'user.email', value: '{{ email }}'}
-    - {key: 'user.name', value: 'Jesse van Bekkum'}
-    - {key: 'push.default', value: 'simple'}
-
-- include_tasks: roles/common/tasks/intellij.yml
-- include_tasks: roles/common/tasks/prog.yml
-
-  ### TODO
-
-#  http://shutter-project.org/faq-help/ppa-installation-guide/
-  #  137  sudo adduser jesse staff
-  # 138  mvn
-  # 139  cd bin
-  # 140  ls
-  # 141  ls -altr
-  # 142  cd ..
-  # 143  ls
-  # 144  cd apache-maven
-  # 145  ls
-  # 146  ls -altr
-  # 147  sudo chown root:staff *
-  # 148  sudo -r chown root:staff *
-  # 149  sudo chown -r root:staff *
-  # 150  sudo chown -R root:staff *
-  # 151  ls
-  # 152  ls -altr
-  # 153  cd bin
-  # 154  ls
-  # 155  ls -altr
-  # 156  chmod 755 *
-  # 157  sudo chmod 755 *
-  # 158  ls
-  # 159  ls -altr
-  # 160  mvn
-  # 161  ./mvn
-  # 162  echo $M2_HOE
-  # 163  echo $M2_HOME
-  # 164  ls
-  # 165  cd ..
-  # 166  pwd
-  # 167  export M2_HOME=/opt/apache-maven
-  # 168  mvn
-  # 169  echo $JAVA_HOME
-  # 170  ls
-  # 171  cd bin
-  # 172  ls
-  # 173  ls -altr
-  # 174  cd ..
-  # 175  cat README.txt
-  # 176  ls
-  # 177  ls -altr
-  # 178  cd ..
-  # 179  chmod -R 755 apache-maven-3.5.0
-  # 180  sudod chmod -R 755 apache-maven-3.5.0
-  # 181  sudo chmod -R 755 apache-maven-3.5.0

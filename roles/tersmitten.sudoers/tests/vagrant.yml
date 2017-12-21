@@ -1,0 +1,13 @@
+# test file for sudoers
+---
+- hosts: all
+  remote_user: vagrant
+  become: true
+  roles:
+    - ../../
+  vars:
+    sudoers_sudoers_d_files:
+      vagrant:
+        privileges:
+          - name: vagrant
+            entry: 'ALL=(ALL) NOPASSWD:ALL'

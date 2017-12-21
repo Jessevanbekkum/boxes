@@ -1,6 +1,0 @@
----
-- name: Install list of packages
-  apt: name={{item}} state=installed update_cache=true
-  become: true
-  with_items:
-       - gradle

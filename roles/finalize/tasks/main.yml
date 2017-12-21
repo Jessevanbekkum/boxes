@@ -1,0 +1,68 @@
+---
+
+- name: Install list of packages
+  apt: name={{item}} state=installed update_cache=true
+  become: true
+  with_items: "{{ apt_packages }}"
+
+
+- name: Upgrade packages
+  apt: upgrade=full
+  become: true
+
+- name: Install remote packages
+  apt:
+    deb: "{{item}}"
+  become: true
+  with_items:
+    - http://nl.archive.ubuntu.com/ubuntu/pool/universe/g/git-extras/git-extras_4.3.0-1_all.deb
+
+- name: Let network-manager manage all network connections
+  lineinfile:
+    dest: /etc/NetworkManager/NetworkManager.conf
+    state: present
+    regexp: '^managed='
+    line: 'managed=true'
+  become: true
+  notify: Restart network-manager
+
+- name: Already create a bunch of directories the home dir
+  file: state=directory path={{item}}
+  become: true
+  become_user: jesse
+  with_items:
+    - ~/Downloads
+    - ~/Desktop
+
+- name: Already create a bunch of directories the home dir
+  file: state=directory path={{item}}
+  become: true
+  become_user: jesse
+  with_items: "{{ dirs_in_home }}"
+
+
+- name: Copy custom zsh files
+  become: true
+  template:
+    src: "{{item}}.j2"
+    dest: /home/jesse/.oh-my-zsh/custom/{{item}}.zsh
+    mode: 0700
+    owner: jesse
+    group: jesse
+  with_items:
+    - alias
+    - shell_utils
+    - docker
+
+- name: Set git properties
+  git_config:
+    name: '{{ item.key }}'
+    scope: global
+    value: '{{ item.value }}'
+  become: true
+  become_user: jesse
+  with_items:
+    - {key: 'core.editor', value: 'vim'}
+    - {key: 'user.email', value: '{{ email }}'}
+    - {key: 'user.name', value: 'Jesse van Bekkum'}
+    - {key: 'push.default', value: 'simple'}

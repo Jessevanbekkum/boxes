@@ -1,0 +1,18 @@
+---
+apt_packages:
+  - aptitude
+  - cntlm
+  - dos2unix
+  - git
+  - gitk
+  - ifmetric
+  - libnss3-tools
+  - network-manager
+  - ntp
+  - ntp-doc
+  - pwgen
+  - whois
+  - xclip
+
+dirs_in_home:
+  - ~/work
